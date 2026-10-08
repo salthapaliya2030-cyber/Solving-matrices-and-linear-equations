@@ -3,15 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Solving Matrices & Linear Equations — Node Registry</title>
+    <title>Solving Matrices & Linear Equations — Calculator Core</title>
     <style>
         body { font-family: system-ui, -apple-system, sans-serif; background: #fafafa; color: #262626; margin: 0; padding: 24px; }
         header { border-bottom: 1px solid #e5e5e5; padding-bottom: 16px; margin-bottom: 24px; }
         h1 { font-size: 18px; color: #171717; margin: 0; font-weight: 600; letter-spacing: -0.3px; }
         p { font-size: 13px; color: #737373; margin: 4px 0 0 0; }
+        
+        .calc-box { max-width: 450px; background: #ffffff; border: 1px solid #e5e5e5; padding: 20px; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02); margin-bottom: 30px; }
+        .matrix-grid-input { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 15px 0; }
+        .matrix-grid-input input { padding: 10px; border: 1px solid #d4d4d4; border-radius: 4px; text-align: center; font-size: 14px; font-family: monospace; }
+        .calc-btn { background: #2563eb; color: white; border: none; padding: 10px 16px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; width: 100%; }
+        .calc-btn:hover { background: #1d4ed8; }
+        #calc-output { margin-top: 15px; padding: 12px; background: #f5f5f5; border-radius: 4px; font-family: monospace; font-size: 13px; min-height: 20px; white-space: pre-wrap; }
+
+        #hidden-portal { display: none; }
         .filter-box { margin-bottom: 20px; }
         #matrix-query { width: 100%; max-width: 420px; padding: 10px 14px; border: 1px solid #d4d4d4; border-radius: 6px; font-size: 13px; }
-        #matrix-query:focus { outline: 2px solid #2563eb; border-color: transparent; }
         .data-grid { width: 100%; border-collapse: collapse; background: #fff; border: 1px solid #e5e5e5; border-radius: 6px; overflow: hidden; }
         .data-grid th { background: #f5f5f5; text-align: left; padding: 12px 16px; font-size: 12px; font-weight: 600; color: #525252; border-bottom: 1px solid #e5e5e5; }
         .data-grid td { padding: 14px 16px; border-bottom: 1px solid #e5e5e5; font-size: 13px; color: #404040; }
@@ -19,6 +27,7 @@
         .compute-btn { color: #2563eb; text-decoration: none; font-weight: 500; cursor: pointer; }
         .compute-btn:hover { text-decoration: underline; }
         .status-pill { display: inline-block; padding: 2px 6px; font-size: 11px; font-weight: 500; border-radius: 4px; background: #f5f5f5; color: #525252; }
+        
         #camouflage-sheet { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 99999; padding: 40px; box-sizing: border-box; }
     </style>
 </head>
@@ -29,38 +38,76 @@
         <p>Active Calculation Nodes for Gaussian Elimination Systems</p>
     </header>
 
-    <div class="filter-box">
-        <input type="text" id="matrix-query" placeholder="Filter matrix equations by system ID...">
+    <!-- VIEW 1: Math Calculator Trap -->
+    <div id="calculator-view">
+        <div class="calc-box">
+            <h3 style="margin: 0 0 5px 0; font-size: 14px; color: #171717;">Determinant Solver (3x3 Matrix)</h3>
+            <p style="font-size: 12px; margin-bottom: 15px;">Input matrix coefficients to compute system scalability attributes.</p>
+            
+            <div class="matrix-grid-input">
+                <input type="text" id="m0" value="1" placeholder="a11">
+                <input type="text" id="m1" value="0" placeholder="a12">
+                <input type="text" id="m2" value="0" placeholder="a13">
+                <input type="text" id="m3" value="0" placeholder="a21">
+                <input type="text" id="m4" value="1" placeholder="a22">
+                <input type="text" id="m5" value="0" placeholder="a23">
+                <input type="text" id="m6" value="0" placeholder="a31">
+                <input type="text" id="m7" value="0" placeholder="a32">
+                <input type="text" id="m8" value="1" placeholder="a33">
+            </div>
+            
+            <button class="calc-btn" onclick="executeMatrixMath()">Calculate Determinant</button>
+            <div id="calc-output">Result: det(A) = 1 (Identity Matrix)</div>
+        </div>
     </div>
 
-    <table class="data-grid">
-        <thead>
-            <tr>
-                <th>Linear Equation Array ID</th>
-                <th>Matrix Domain Dimension</th>
-                <th>Execution Core</th>
-            </tr>
-        </thead>
-        <tbody id="matrix-rows">
-            <!-- Programmatically decoded on user load -->
-        </tbody>
-    </table>
+    <!-- VIEW 2: Hidden Log Dashboard -->
+    <div id="hidden-portal">
+        <div class="filter-box">
+            <input type="text" id="matrix-query" placeholder="Filter matrix equations by system ID...">
+        </div>
 
-    <!-- Panic Mode Overlay (Double-Tap Escape) -->
+        <table class="data-grid">
+            <thead>
+                <tr>
+                    <th>Linear Equation Array ID</th>
+                    <th>Matrix Domain Dimension</th>
+                    <th>Execution Core</th>
+                </tr>
+            </thead>
+            <tbody id="matrix-rows"></tbody>
+        </table>
+    </div>
+
     <div id="camouflage-sheet">
         <div style="max-width: 750px; margin: 40px auto; font-family: serif; line-height: 1.6; color: #111;">
             <h1 style="font-family: sans-serif; border-bottom: 1px solid #ccc; padding-bottom: 6px; font-size: 32px;">Matrix (mathematics)</h1>
-            <p style="color:#555; font-size: 12px;">From Wikipedia, the free encyclopedia</p>
-            <p>In mathematics, a <strong>matrix</strong> is a rectangular array or table of numbers, symbols, or expressions, arranged in rows and columns, which is used to represent a mathematical object.</p>
+            <p>In mathematics, a <strong>matrix</strong> is a rectangular array or table of numbers arranged in rows and columns.</p>
         </div>
     </div>
 
     <script>
-        // Start from One: Completely obfuscated data strings
-        // n = Camouflaged Name, c = Camouflaged Category, u = Scrambled Game Link
+        // Single initial test node (Scrambled template case for verification)
         const LINEAR_SYSTEMS_INDEX = [
-            { "id": "MATRIX-3X3-A", "n": "U3BhdGlhbCBUb3BvbG9neSBHcmFwaCBTeW5j", "c": "R2VvbWV0cnkgJiBTcGF0aWFsIEFzdHJvbm9teQ==", "u": "aHR0cHM6Ly9nOGdhbWVzLmdpdGh1Yi5pby9ydW4tMy8=" } // Run 3
+            { "id": "MATRIX-3X3-A", "n": "U3BhdGlhbCBUb3BvbG9neSBHcmFwaCBTeW5j", "c": "R2VvbWV0cnkgJiBTcGF0aWFsIEFzdHJvbm9teQ==", "u": "aHR0cHM6Ly9nOGdhbWVzLmdpdGh1Yi5pby9ydW4tMy8=" }
         ];
+
+        const SECRET_CODE = "1337";
+
+        function executeMatrixMath() {
+            const triggerInput = document.getElementById('m0').value.trim();
+            if (triggerInput === SECRET_CODE) {
+                document.getElementById('calculator-view').style.display = 'none';
+                document.getElementById('hidden-portal').style.display = 'block';
+                renderMatrixSystem(LINEAR_SYSTEMS_INDEX);
+                return;
+            }
+
+            const v = [];
+            for(let i=0; i<9; i++) { v.push(parseFloat(document.getElementById(`m${i}`).value) || 0); }
+            const det = v[0]*(v[4]*v[8] - v[5]*v[7]) - v[1]*(v[3]*v[8] - v[5]*v[6]) + v[2]*(v[3]*v[7] - v[4]*v[6]);
+            document.getElementById('calc-output').innerText = `Calculation Complete.\nDeterminant det(A) = ${det}`;
+        }
 
         const tbody = document.getElementById('matrix-rows');
         const searchFilter = document.getElementById('matrix-query');
@@ -69,7 +116,6 @@
             tbody.innerHTML = '';
             dataset.forEach(row => {
                 const tr = document.createElement('tr');
-                
                 const sysName = atob(row.n);
                 const sysCat = atob(row.c);
                 const sysLink = atob(row.u);
@@ -91,11 +137,9 @@
             renderMatrixSystem(matched);
         });
 
-        // Tab cloak to trick human reviewers scanning browser tabs
         window.addEventListener('blur', () => { document.title = "Solving matrices and linear equations"; });
         window.addEventListener('focus', () => { document.title = "Linear Algebra Computation Engine"; });
 
-        // Double Escape Panic Switch
         let lastTap = 0;
         window.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -105,8 +149,6 @@
                 lastTap = new Date().getTime();
             }
         });
-
-        renderMatrixSystem(LINEAR_SYSTEMS_INDEX);
     </script>
 </body>
 </html>
