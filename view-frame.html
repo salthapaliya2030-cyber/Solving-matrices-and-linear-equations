@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Diagnostics Console</title>
+    <style>
+        body { margin: 0; background: #000; height: 100vh; display: flex; flex-direction: column; font-family: sans-serif; overflow: hidden; }
+        .control-bar { background: #171717; padding: 12px; border-bottom: 1px solid #262626; z-index: 10; }
+        .control-bar a { color: #2563eb; text-decoration: none; font-size: 13px; font-weight: 600; font-family: system-ui, sans-serif; }
+        .control-bar a:hover { text-decoration: underline; }
+        #render-target { flex: 1; width: 100%; height: 100%; position: relative; }
+        iframe { width: 100%; height: 100%; border: none; background: #000; }
+        /* Emergency Camouflage Sheet */
+        #camouflage-sheet { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #fff; z-index: 99999; padding: 40px; box-sizing: border-box; }
+    </style>
+</head>
+<body>
+
+    <div class="control-bar"><a href="/">← Back to Linear Matrix Node Logs</a></div>
+    <div id="render-target"></div>
+
+    <!-- Panic Mode Overlay (Double-Tap Escape) -->
+    <div id="camouflage-sheet">
+        <div style="max-width: 750px; margin: 40px auto; font-family: serif; line-height: 1.6; color: #111;">
+            <h1 style="font-family: sans-serif; border-bottom: 1px solid #ccc; padding-bottom: 6px; font-size: 32px;">Matrix (mathematics)</h1>
+            <p style="color:#555; font-size: 12px;">From Wikipedia, the free encyclopedia</p>
+            <p>In mathematics, a <strong>matrix</strong> is a rectangular array or table of numbers, symbols, or expressions, arranged in rows and columns, which is used to represent a mathematical object or a property of such an object.</p>
+            <h3>Linear Systems</h3>
+            <p>Matrices can be used to compactly write and work with multiple linear equations, that is, systems of linear equations.</p>
+        </div>
+    </div>
+
+    <script>
+        const urlArgs = new URLSearchParams(window.location.search);
+        const embeddedStream = urlArgs.get('stream');
+        const containerBox = document.getElementById('render-target');
+
+        if (embeddedStream) {
+            const displayFrame = document.createElement('iframe');
+            displayFrame.src = embeddedStream;
+            // Fully sandboxed yet allows keyboard input, frame communication, and mouse locking for games
+            displayFrame.sandbox = "allow-scripts allow-same-origin allow-forms allow-pointer-lock";
+            displayFrame.allow = "autoplay; fullscreen; gamepad";
+            containerBox.appendChild(displayFrame);
+        } else {
+            containerBox.innerHTML = "<p style='color:white; text-align:center; margin-top:40px;'>Data execution block error.</p>";
+        }
+
+        // Tab Cloaking Logic
+        window.addEventListener('blur', () => { document.title = "Solving matrices and linear equations"; });
+        window.addEventListener('focus', () => { document.title = "System Diagnostics Console"; });
+
+        // Double Escape Panic Switch inside the player frame canvas
+        let lastTap = 0;
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                if (new Date().getTime() - lastTap < 500) { 
+                    // Hide everything and clear frame streams
+                    containerBox.innerHTML = '';
+                    document.getElementById('camouflage-sheet').style.display = 'block'; 
+                }
+                lastTap = new Date().getTime();
+            }
+        });
+    </script>
+</body>
+</html>
